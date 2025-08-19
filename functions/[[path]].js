@@ -30,6 +30,14 @@ export default {
 		reqHeaders.set('X-Forwarded-Host', inUrl.host);
 		reqHeaders.set('X-Forwarded-Proto', inUrl.protocol.replace(':', ''));
 		reqHeaders.set('Host', outUrl.host);
+		// Optional upstream auth injection if client didn't send one
+		if (!reqHeaders.has('Authorization')) {
+			if (env.UPSTREAM_AUTH_HEADER) {
+				reqHeaders.set('Authorization', env.UPSTREAM_AUTH_HEADER);
+			} else if (env.UPSTREAM_BASIC_AUTH) {
+				reqHeaders.set('Authorization', `Basic ${env.UPSTREAM_BASIC_AUTH}`);
+			}
+		}
 
 		const init = {
 			method: request.method,
